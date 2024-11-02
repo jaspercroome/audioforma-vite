@@ -21,29 +21,19 @@ function App() {
   };
 
   return (
-    <html>
-      <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0"
-        ></meta>
-      </head>
-      <main>
-        <div className="flex flex-col justify-start gap-2 h-[100vh]">
-          <div className="flex flex-col md:flex-row gap-4 w-full h-4/5">
-            <CircleFifthsChart
-              previewUrl={previewUrl}
-              width={dimensions.width}
-              height={dimensions.height}
-              song={song}
-            />
-            <Suspense fallback={<p>Loading...</p>}>
-              <SongChooserTable onClick={handleClick} />
-            </Suspense>
-          </div>
-        </div>
-      </main>
-    </html>
+    <div className="flex flex-col justify-start gap-2 h-[100vh]">
+      <div className="flex flex-col md:flex-row gap-4 w-full h-4/5">
+        <CircleFifthsChart
+          previewUrl={previewUrl}
+          width={dimensions.width}
+          height={dimensions.height}
+          song={song}
+        />
+        <Suspense fallback={<p>Loading...</p>}>
+          <SongChooserTable onClick={handleClick} />
+        </Suspense>
+      </div>
+    </div>
   );
 }
 
