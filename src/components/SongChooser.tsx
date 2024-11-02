@@ -37,12 +37,14 @@ interface SongChooserProps {
 export const SongChooserTable = (props: SongChooserProps) => {
   const [songs, setSongs] = useState<Array<Song>>([]);
   const [displaySongs, setDisplaySongs] = useState<Array<Song>>([]);
+  const [loading, setLoading] = useState(false);
   const storedAccessToken = localStorage.getItem(spotifyAccessTokenKey);
   useEffect(() => {
     if (storedAccessToken !== null) {
       getSpotifyData(storedAccessToken).then((d) => {
         setSongs(d);
         setDisplaySongs(d);
+        setLoading(false);
       });
     }
   }, [storedAccessToken]);
@@ -65,29 +67,36 @@ export const SongChooserTable = (props: SongChooserProps) => {
   };
 
   if (displaySongs.length == 0) {
-    return (
-      <div className="w-full h-full flex flex-col justify-center items-center gap-8 px-20">
-        <div>
-          <p className="font-bold text-xl">
-            Have a Spotify account? Click the green button below to connect and
-            see your songs.
-          </p>
-          <AuthenticationButton />
+    if (loading) {
+      return (
+        <div className="w-full h-full flex flex-col justify-center items-center">
+          <p className="text-2xl font-bold text-pink-600">Loading....</p>
         </div>
-        <div>
-          <p className="font-bold text-xl">
-            No Spotify account? No problem! Click the purple button below to see
-            a set of sample songs.
-          </p>
-          <button
-            className={`rounded w-fit h-fit bg-violet-600 text-[#efefef] font-bold cursor-pointer p-2`}
-            onClick={() => setDisplaySongs(sampleSongs.tracks as Array<Song>)}
-          >
-            Show sample songs
-          </button>
+      );
+    } else
+      return (
+        <div className="w-full h-full flex flex-col justify-center items-center gap-8 px-20">
+          <div>
+            <p className="font-bold text-xl">
+              Have a Spotify account? Click the green button below to connect
+              and see your songs.
+            </p>
+            <AuthenticationButton onAuthenticate={() => setLoading(true)} />
+          </div>
+          <div>
+            <p className="font-bold text-xl">
+              No Spotify account? No problem! Click the purple button below to
+              see a set of sample songs.
+            </p>
+            <button
+              className={`rounded w-fit h-fit bg-violet-600 text-[#efefef] font-bold cursor-pointer p-2`}
+              onClick={() => setDisplaySongs(sampleSongs.tracks as Array<Song>)}
+            >
+              Show sample songs
+            </button>
+          </div>
         </div>
-      </div>
-    );
+      );
   }
 
   return (

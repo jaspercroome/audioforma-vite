@@ -12,7 +12,7 @@ export const getSpotifyData = async (
     const audioFeatures = songAudioFeatures.find((af) => af.id === song.id);
     return { ...song, ...audioFeatures };
   });
-  return compiledData;
+  return compiledData as unknown as Song[];
 };
 
 const getMySongData = async (
@@ -25,6 +25,11 @@ const getMySongData = async (
     href: string;
     albumName: string;
     artists: Array<{ name: string }>;
+    type: string;
+    uri: string;
+    track_href: string;
+    analysis_url: string;
+    duration_ms: string;
   }> = [],
 ): Promise<
   Array<{
@@ -53,11 +58,16 @@ const getMySongData = async (
       added: string;
       track: {
         id: string;
+        preview_url: string;
+        artists: Array<{ name: string }>;
         album: { name: string };
         name: string;
         href: string;
-        preview_url: string;
-        artists: Array<{ name: string }>;
+        type: string;
+        uri: string;
+        track_href: string;
+        analysis_url: string;
+        duration_ms: string;
       };
     }>;
   } = await response.json();
@@ -70,6 +80,11 @@ const getMySongData = async (
       name: item.track.name,
       href: item.track.href,
       albumName: item.track.album.name,
+      type: item.track.type,
+      uri: item.track.uri,
+      track_href: item.track.track_href,
+      analysis_url: item.track.analysis_url,
+      duration_ms: item.track.duration_ms,
       artists: item.track.artists.map((a) => ({ name: a.name })),
     })),
   );
