@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Analytics } from '@vercel/analytics/react';
 import { Suspense, useEffect, useState } from 'react';
 
 import './App.css';
@@ -42,6 +43,7 @@ function App() {
         </div>
       </div>
       <ReactQueryDevtools initialIsOpen={false} />
+      <Analytics />
     </QueryClientProvider>
   );
 }
