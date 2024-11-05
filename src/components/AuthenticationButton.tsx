@@ -62,14 +62,25 @@ export const AuthenticationButton = (props: {
   }
 
   return (
-    <button
-      className={`rounded w-fit h-fit ${
-        accessToken ? 'bg-slate-400' : 'bg-[#1ed760]'
-      } text-[#121212] font-bold cursor-pointer p-2`}
-      disabled={Boolean(accessToken)}
-      onClick={buttonFn}
-    >
-      {buttonString}
-    </button>
+    <div className="flex flex-w border-black border-2 p-1 rounded-sm m-2 flex-col justify-center items-center bg-slate-200">
+      <button
+        className={`rounded w-fit h-fit ${
+          accessToken ? 'bg-slate-400' : 'bg-[#1ed760]'
+        } text-[#121212] font-bold cursor-pointer p-2`}
+        disabled={Boolean(accessToken)}
+        onClick={buttonFn}
+      >
+        {buttonString}
+      </button>
+      <p className="text-sm italic text-gray-800">
+        note - while Spotify reviews this app for public use, clicking this
+        button won't actually show your songs. I'm hoping to make it generally
+        available in the coming days - thanks for your patience!
+      </p>
+      <p className="text-sm text-gray-800 font-semibold">
+        In the meantime, click the button below to see a list of tracks that I
+        enjoy.
+      </p>
+    </div>
   );
 };
