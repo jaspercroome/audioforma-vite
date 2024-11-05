@@ -15,10 +15,17 @@ export const SongChooserTable = (props: SongChooserProps) => {
   const [displaySongs, setDisplaySongs] = useState<Array<Song>>([]);
   const storedAccessToken = localStorage.getItem(spotifyAccessTokenKey);
 
-  const { data: songData, isLoading } = useSongData(storedAccessToken);
+  const {
+    data: songData,
+    isLoading,
+    isFetched,
+  } = useSongData(storedAccessToken);
 
   useEffect(() => {
     if (songData) {
+      const sortedSongs = songData.sort((a, b) =>
+        a.artists[0].name.localeCompare(b.artists[0].name),
+      );
       setSongs(songData);
       setDisplaySongs(songData);
     }
@@ -48,7 +55,7 @@ export const SongChooserTable = (props: SongChooserProps) => {
           <p className="text-2xl font-bold text-pink-600">Loading....</p>
         </div>
       );
-    } else
+    } else if (!isFetched) {
       return (
         <div className="w-full h-full flex flex-col justify-center items-center gap-8 px-20">
           <div>
@@ -76,6 +83,7 @@ export const SongChooserTable = (props: SongChooserProps) => {
           </div>
         </div>
       );
+    }
   }
 
   return (

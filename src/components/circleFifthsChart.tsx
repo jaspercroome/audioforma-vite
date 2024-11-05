@@ -30,10 +30,10 @@ export const CircleFifthsChart = (props: {
   const [chroma, setChroma] = useState<Array<number>>([]);
   const [playing, setPlaying] = useState(false);
   const [hover, setHover] = useState(false);
-  const [maxZcr, setMaxZcr] = useState<number>();
-  const [strongestNoteCoords, setStrongestNoteCoords] = useState([
-    [width / 2, height / 2],
-  ]);
+  // const [maxZcr, setMaxZcr] = useState<number>();
+  // const [strongestNoteCoords, setStrongestNoteCoords] = useState([
+  //   [width / 2, height / 2],
+  // ]);
 
   const amplitudeScale = d3
     .scaleLinear()
@@ -79,34 +79,34 @@ export const CircleFifthsChart = (props: {
             perceptualSpread: number;
             zcr: number;
           }) => {
-            const { chroma, powerSpectrum, zcr } = results;
+            const { chroma, powerSpectrum } = results;
             setKeyOctaveAmplitudes(
               processAmplitudeSpectrum(powerSpectrum, audioContext),
             );
             setChroma(chroma);
-            if (!maxZcr) {
-              setMaxZcr(zcr);
-            } else {
-              if (zcr / maxZcr <= 1.5) {
-                setMaxZcr(zcr);
-                const maxChroma = Math.max(...chroma);
-                // Determine the strongest note by finding the max chroma value index
-                const strongestIndex = chroma.indexOf(maxChroma);
-                if (strongestIndex !== -1 && maxChroma > 0.3) {
-                  console.log({ zcr, strongestIndex, chroma });
-                  const angle =
-                    ((noteAngles[noteNames[strongestIndex]] - 90) / 360) *
-                    2 *
-                    Math.PI;
-                  const x = Math.cos(angle) * radius * 6;
-                  const y = Math.sin(angle) * radius * 6;
-                  setStrongestNoteCoords((prior) => [
-                    [x + width / 2, y + height / 2.5 + 124],
-                    ...prior,
-                  ]);
-                }
-              }
-            }
+            // if (!maxZcr) {
+            //   setMaxZcr(zcr);
+            // } else {
+            //   if (zcr / maxZcr <= 1.5) {
+            // setMaxZcr(zcr);
+            // const maxChroma = Math.max(...chroma);
+            // // Determine the strongest note by finding the max chroma value index
+            // const strongestIndex = chroma.indexOf(maxChroma);
+            // if (strongestIndex !== -1 && maxChroma > 0.3) {
+            //   console.log({ zcr, strongestIndex, chroma });
+            //   const angle =
+            //     ((noteAngles[noteNames[strongestIndex]] - 90) / 360) *
+            //     2 *
+            //     Math.PI;
+            // const x = Math.cos(angle) * radius * 6;
+            // const y = Math.sin(angle) * radius * 6;
+            // setStrongestNoteCoords((prior) => [
+            //   [x + width / 2, y + height / 2.5 + 124],
+            //   ...prior,
+            // ]);
+            // }
+            // }
+            // }
           },
         });
 
@@ -114,9 +114,9 @@ export const CircleFifthsChart = (props: {
       }
     }
   }, [previewUrl, playing]);
-  useEffect(() => {
-    setStrongestNoteCoords([[width / 2, height / 2]]);
-  }, [previewUrl]);
+  // useEffect(() => {
+  //   setStrongestNoteCoords([[width / 2, height / 2]]);
+  // }, [previewUrl]);
   const radius = constrainingDimension / 16;
   return (
     <div className="w-fit flex flex-col gap-2">
