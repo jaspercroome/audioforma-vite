@@ -23,7 +23,7 @@ export const SongChooserTable = (props: SongChooserProps) => {
 
   useEffect(() => {
     if (songData) {
-      const sortedSongs = songData.sort((a, b) =>
+      songData.sort((a, b) =>
         a.artists[0].name.localeCompare(b.artists[0].name),
       );
       setSongs(songData);
