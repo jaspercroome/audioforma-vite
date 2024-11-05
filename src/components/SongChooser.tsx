@@ -1,53 +1,28 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { spotifyAccessTokenKey } from './utils';
-import { getSpotifyData } from './getSpotifyData';
+import { Song, spotifyAccessTokenKey } from './utils';
 import { AuthenticationButton } from './AuthenticationButton';
 import sampleSongs from './my_tracks.json';
-
-export interface Song {
-  id: string;
-  previewUrl: string;
-  name: string;
-  href: string;
-  artists: Array<{ name: string }>;
-  albumName: string;
-  danceability: number;
-  energy: number;
-  key: number;
-  loudness: number;
-  mode: number;
-  speechiness: number;
-  acousticness: number;
-  instrumentalness: number;
-  liveness: number;
-  valence: number;
-  tempo: number;
-  type: string;
-  uri: string;
-  track_href: string;
-  analysis_url: string;
-  duration_ms: number;
-  time_signature: number;
-}
+import { useSongData } from './useSongData';
 
 interface SongChooserProps {
   onClick: (s: Song) => void;
+  selectedSong?: Song;
 }
 
 export const SongChooserTable = (props: SongChooserProps) => {
+  const { onClick, selectedSong } = props;
   const [songs, setSongs] = useState<Array<Song>>([]);
   const [displaySongs, setDisplaySongs] = useState<Array<Song>>([]);
-  const [loading, setLoading] = useState(false);
   const storedAccessToken = localStorage.getItem(spotifyAccessTokenKey);
+
+  const { data: songData, isLoading } = useSongData(storedAccessToken);
+
   useEffect(() => {
-    if (storedAccessToken !== null) {
-      getSpotifyData(storedAccessToken).then((d) => {
-        setSongs(d);
-        setDisplaySongs(d);
-        setLoading(false);
-      });
+    if (songData) {
+      setSongs(songData);
+      setDisplaySongs(songData);
     }
-  }, [storedAccessToken]);
+  }, [songData]);
 
   const handleSearchArtistChange = (e: ChangeEvent<HTMLInputElement>) => {
     const lowerCaseArtist = e.target.value.toLowerCase();
@@ -67,7 +42,7 @@ export const SongChooserTable = (props: SongChooserProps) => {
   };
 
   if (displaySongs.length == 0) {
-    if (loading) {
+    if (isLoading) {
       return (
         <div className="w-full h-full flex flex-col justify-center items-center">
           <p className="text-2xl font-bold text-pink-600">Loading....</p>
@@ -81,7 +56,11 @@ export const SongChooserTable = (props: SongChooserProps) => {
               Have a Spotify account? Click the green button below to connect
               and see your songs.
             </p>
-            <AuthenticationButton onAuthenticate={() => setLoading(true)} />
+            <AuthenticationButton
+              onAuthenticate={() => {
+                window.location.reload();
+              }}
+            />
           </div>
           <div>
             <p className="font-bold text-xl">
@@ -103,12 +82,25 @@ export const SongChooserTable = (props: SongChooserProps) => {
     <div className="min-w-fit flex flex-col gap-2 h-full">
       <div className="flex flex-row gap-1">
         <label htmlFor="song">Song Title</label>
-        <input type="text" id="song" onChange={handleSearchSongTitleChange} />
+        <input
+          type="text"
+          id="song"
+          onChange={handleSearchSongTitleChange}
+          className="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
+          placeholder="Song title"
+        />
         <label htmlFor="artist">Artist</label>
-        <input type="select" id="artist" onChange={handleSearchArtistChange} />
+        <input
+          type="select"
+          id="artist"
+          onChange={handleSearchArtistChange}
+          className='className="block w-full rounded-md border-0 py-1.5 pl-7 pr-20 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
+          '
+          placeholder="Artist name"
+        />
       </div>
       <div className="overflow-y-auto max-h-full">
-        <table className="table-auto overflow-auto">
+        <table className="table-auto overflow-y-auto w-full">
           <thead className="sticky top-0 bg-white z-10">
             <tr>
               <th>song name</th>
@@ -122,14 +114,16 @@ export const SongChooserTable = (props: SongChooserProps) => {
               .map((d) => (
                 <tr
                   key={d.id}
-                  onClick={() => props.onClick(d)}
-                  className="cursor-pointer hover:bg-blue-100 border-b-2"
+                  onClick={() => onClick(d)}
+                  className={`w-full cursor-pointer hover:bg-blue-100 border-b-2 ${
+                    d.id === selectedSong?.id && 'bg-blue-200'
+                  }`}
                 >
-                  <td className="max-w-60 flex flex-row justify-start align-top">
-                    {d.name}
+                  <td className="max-w-24 flex justify-start">
+                    {d.name.includes(' ') ? d.name : d.name.slice(0, 16)}
                   </td>
-                  <td className="w-60">{d.artists[0].name}</td>
-                  <td>{d.albumName}</td>
+                  <td className="w-fit">{d.artists[0].name}</td>
+                  <td className="w-fit">{d.albumName}</td>
                 </tr>
               ))}
           </tbody>

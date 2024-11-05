@@ -6,16 +6,13 @@ import {
   noteNames,
   octaves,
   processAmplitudeSpectrum,
+  Song,
 } from './utils';
 import { MeydaAnalyzer } from 'meyda/dist/esm/meyda-wa';
 
 export const CircleFifthsChart = (props: {
   previewUrl?: string;
-  song?: {
-    previewUrl: string;
-    artists: ReadonlyArray<{ name: string }>;
-    name: string;
-  };
+  song?: Song;
   width?: number;
   height?: number;
 }) => {
@@ -26,17 +23,22 @@ export const CircleFifthsChart = (props: {
   const audioContextRef = useRef<AudioContext>(null);
   const audioSourceRef = useRef<MediaElementAudioSourceNode>(null);
   const analyzerRef = useRef<MeydaAnalyzer>(null);
+
   const [keyOctaveAmplitudes, setKeyOctaveAmplitudes] = useState<{
     [keyString: string]: number;
   }>({});
   const [chroma, setChroma] = useState<Array<number>>([]);
   const [playing, setPlaying] = useState(false);
   const [hover, setHover] = useState(false);
+  const [maxZcr, setMaxZcr] = useState<number>();
+  const [strongestNoteCoords, setStrongestNoteCoords] = useState([
+    [width / 2, height / 2],
+  ]);
 
   const amplitudeScale = d3
     .scaleLinear()
-    .domain([0, 200])
-    .range([1, constrainingDimension / 4]);
+    .domain([0, 10000])
+    .range([1, constrainingDimension / 10]);
 
   amplitudeScale.clamp();
 
@@ -69,16 +71,42 @@ export const CircleFifthsChart = (props: {
           audioContext,
           source: audioSourceRef.current,
           bufferSize: 2048,
-          featureExtractors: ['amplitudeSpectrum', 'chroma'],
+          featureExtractors: ['chroma', 'powerSpectrum', 'zcr'],
           callback: (results: {
             amplitudeSpectrum: number[];
+            powerSpectrum: number[];
             chroma: number[];
+            perceptualSpread: number;
+            zcr: number;
           }) => {
-            const { amplitudeSpectrum, chroma } = results;
+            const { chroma, powerSpectrum, zcr } = results;
             setKeyOctaveAmplitudes(
-              processAmplitudeSpectrum(amplitudeSpectrum, audioContext),
+              processAmplitudeSpectrum(powerSpectrum, audioContext),
             );
             setChroma(chroma);
+            if (!maxZcr) {
+              setMaxZcr(zcr);
+            } else {
+              if (zcr / maxZcr <= 1.5) {
+                setMaxZcr(zcr);
+                const maxChroma = Math.max(...chroma);
+                // Determine the strongest note by finding the max chroma value index
+                const strongestIndex = chroma.indexOf(maxChroma);
+                if (strongestIndex !== -1 && maxChroma > 0.3) {
+                  console.log({ zcr, strongestIndex, chroma });
+                  const angle =
+                    ((noteAngles[noteNames[strongestIndex]] - 90) / 360) *
+                    2 *
+                    Math.PI;
+                  const x = Math.cos(angle) * radius * 6;
+                  const y = Math.sin(angle) * radius * 6;
+                  setStrongestNoteCoords((prior) => [
+                    [x + width / 2, y + height / 2.5 + 124],
+                    ...prior,
+                  ]);
+                }
+              }
+            }
           },
         });
 
@@ -86,6 +114,9 @@ export const CircleFifthsChart = (props: {
       }
     }
   }, [previewUrl, playing]);
+  useEffect(() => {
+    setStrongestNoteCoords([[width / 2, height / 2]]);
+  }, [previewUrl]);
   const radius = constrainingDimension / 16;
   return (
     <div className="w-fit flex flex-col gap-2">
@@ -152,9 +183,22 @@ export const CircleFifthsChart = (props: {
             </filter>
           </defs>
           <rect x={0} y={0} width={width} height={height} fill={baseColor} />
-          <text x={15} y={32} fill="white" fontWeight={800}>
-            {song?.name} - {song?.artists[0].name}
-          </text>
+          {song && (
+            <text x={15} y={32} fill="white" fontWeight={800}>
+              {song?.name} - {song?.artists[0].name}
+            </text>
+          )}
+          {/* <path
+            d={`M${width / 2},${height / 2.5} ${strongestNoteCoords.map(
+              (point) => `L${point[0]},${point[1]}`,
+            )}Z`}
+            stroke="white"
+            strokeWidth="5"
+            fill="none"
+            strokeOpacity={0.4}
+            strokeLinecap="round"
+            style={{ transition: 'd 0.5s ease' }}
+          /> */}
           {/* note labels */}
           {Object.entries(noteAngles).map(([note, degrees], index) => {
             const angle = ((degrees - 90) / 360) * 2 * Math.PI;
@@ -183,7 +227,7 @@ export const CircleFifthsChart = (props: {
             const translateValue = `${width / 2}, ${
               height / 2.5 + octaveIndex * 25 - 75
             }`;
-            const probablyPercussion = octave >= 6;
+            const probablyPercussion = octave > 6;
             const noteNameValues = Object.values(noteNames);
             return (
               <g key={octave}>
@@ -203,8 +247,8 @@ export const CircleFifthsChart = (props: {
                     return (
                       <line
                         key={note + octave}
-                        x1={x - amplitude / 4}
-                        x2={x + amplitude / 4}
+                        x1={x - amplitude / 10}
+                        x2={x + amplitude / 10}
                         y1={y}
                         y2={y}
                         strokeWidth={2}
@@ -218,20 +262,21 @@ export const CircleFifthsChart = (props: {
                     );
                   } else if (chroma[index] > 0.4)
                     return (
-                      <line
+                      <rect
                         key={note + octave}
-                        x1={x - amplitudeScale(amplitude)}
-                        x2={x + amplitudeScale(amplitude)}
-                        y1={y}
-                        y2={y}
-                        strokeWidth={6}
-                        opacity={0.6}
-                        stroke={color.toString()}
+                        x={x - Math.min(amplitudeScale(amplitude), 50)}
+                        y={y}
+                        width={Math.min(amplitudeScale(amplitude) * 2, 100)}
+                        height={2 * (10 - octave)}
+                        fill={color.toString()}
+                        opacity={0.9}
+                        rx={Math.min(4, amplitudeScale(amplitude) / 2)}
                         transform={`
                                 translate(${translateValue})
                                 rotate(${rotateValue} ${x} ${y})
                               `}
                       />
+                      // </g>
                     );
                 })}
               </g>
@@ -255,6 +300,15 @@ export const CircleFifthsChart = (props: {
             </g>
           )}
         </svg>
+      )}
+      {song && (
+        <a
+          href={song?.spotify_url}
+          target="_blank"
+          className="text-sm italic text-gray-400"
+        >
+          <p>{`See "${song.name}" by ${song.artists[0].name} on Spotify`}</p>
+        </a>
       )}
     </div>
   );

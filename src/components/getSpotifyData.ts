@@ -1,4 +1,4 @@
-import { Song } from './SongChooser';
+import { Song } from './utils';
 
 export const getSpotifyData = async (
   accessToken: string,
@@ -30,6 +30,7 @@ const getMySongData = async (
     track_href: string;
     analysis_url: string;
     duration_ms: string;
+    spotify_url: string;
   }> = [],
 ): Promise<
   Array<{
@@ -44,6 +45,7 @@ const getMySongData = async (
     track_href: string;
     analysis_url: string;
     duration_ms: string;
+    spotify_url: string;
   }>
 > => {
   const defaultUrl = 'https://api.spotify.com/v1/me/tracks?limit=50';
@@ -68,6 +70,9 @@ const getMySongData = async (
         track_href: string;
         analysis_url: string;
         duration_ms: string;
+        external_urls: {
+          spotify: string;
+        };
       };
     }>;
   } = await response.json();
@@ -85,6 +90,7 @@ const getMySongData = async (
       track_href: item.track.track_href,
       analysis_url: item.track.analysis_url,
       duration_ms: item.track.duration_ms,
+      spotify_url: item.track.external_urls.spotify,
       artists: item.track.artists.map((a) => ({ name: a.name })),
     })),
   );

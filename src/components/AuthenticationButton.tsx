@@ -6,7 +6,9 @@ import {
   spotifyRefreshTokenKey,
 } from './utils';
 
-export const AuthenticationButton = (props: { onAuthenticate: () => void }) => {
+export const AuthenticationButton = (props: {
+  onAuthenticate?: () => void;
+}) => {
   const clientId = '6b58815e509940539428705cce2b1d14';
   const [accessToken, setAccessToken] = useState<string | undefined | null>();
   const [code, setCode] = useState<string>();
@@ -40,7 +42,7 @@ export const AuthenticationButton = (props: { onAuthenticate: () => void }) => {
       getAccessToken(clientId, code).then((token) => {
         setAccessToken(token);
         localStorage.setItem(spotifyAccessTokenKey, token);
-        props.onAuthenticate();
+        props.onAuthenticate?.();
       });
     }
   }, [code]);

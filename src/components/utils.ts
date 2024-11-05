@@ -64,6 +64,33 @@ export interface NoteInfo {
   cents: number;
 }
 
+export interface Song {
+  id: string;
+  previewUrl: string;
+  name: string;
+  href: string;
+  artists: Array<{ name: string }>;
+  albumName: string;
+  danceability: number;
+  energy: number;
+  key: number;
+  loudness: number;
+  mode: number;
+  speechiness: number;
+  acousticness: number;
+  instrumentalness: number;
+  liveness: number;
+  valence: number;
+  tempo: number;
+  type: string;
+  uri: string;
+  track_href: string;
+  analysis_url: string;
+  duration_ms: number;
+  time_signature: number;
+  spotify_url: string;
+}
+
 export const octaves = [0, 1, 2, 3, 4, 5, 6, 7].sort((a, b) => b - a);
 
 export const frequencyToNote = (frequency: number): NoteInfo => {
