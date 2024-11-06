@@ -10,7 +10,7 @@ export const AuthenticationButton = (props: {
   onAuthenticate?: () => void;
 }) => {
   const clientId = '6b58815e509940539428705cce2b1d14';
-  const [accessToken, setAccessToken] = useState<string | undefined | null>();
+  // const [accessToken, setAccessToken] = useState<string | undefined | null>();
   const [code, setCode] = useState<string>();
   const [buttonString, setButtonString] = useState('Authorize Spotify Access');
 
@@ -20,7 +20,7 @@ export const AuthenticationButton = (props: {
 
   useEffect(() => {
     if (storedAccessToken !== null && !isStale) {
-      setAccessToken(storedAccessToken);
+      // setAccessToken(storedAccessToken);
       setButtonString('Authorized 👍');
     }
   }, [storedAccessToken, isStale]);
@@ -40,7 +40,7 @@ export const AuthenticationButton = (props: {
   useEffect(() => {
     if (code) {
       getAccessToken(clientId, code).then((token) => {
-        setAccessToken(token);
+        // setAccessToken(token);
         localStorage.setItem(spotifyAccessTokenKey, token);
         props.onAuthenticate?.();
       });
