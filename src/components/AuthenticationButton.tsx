@@ -65,9 +65,11 @@ export const AuthenticationButton = (props: {
     <div className="flex flex-w border-black border-2 p-1 rounded-sm m-2 flex-col justify-center items-center bg-slate-200">
       <button
         className={`rounded w-fit h-fit ${
-          accessToken ? 'bg-slate-400' : 'bg-[#1ed760]'
-        } text-[#121212] font-bold cursor-pointer p-2`}
-        disabled={Boolean(accessToken)}
+          // accessToken ? 'bg-slate-400' : 'bg-[#1ed760]'
+          'bg-slate-400'
+        } text-[#121212] font-bold cursor-not-allowed p-2`}
+        // disabled={Boolean(accessToken)}
+        disabled={true}
         onClick={buttonFn}
       >
         {buttonString}
